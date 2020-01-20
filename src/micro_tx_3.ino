@@ -3,7 +3,7 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
-#define THRESH 2.5 //voltage threshold to dete
+#define THRESH 2 //voltage threshold to dete
 
 //nrf message definitions
 int go[1];
@@ -36,18 +36,18 @@ Serial.begin(9600);
 radio.begin();
 radio.openWritingPipe(pipe);
  //I-O
-pinMode(BATvoltagePin, INPUT);
+//pinMode(BATvoltagePin, INPUT);
 pinMode(coachButton, INPUT);
-pinMode(setSwitch, INPUT);
-pinMode(PracticeRaceSelectSwitch, INPUT);
-pinMode(lowBATled, OUTPUT);
-pinMode(powerONled, OUTPUT);
+//pinMode(setSwitch, INPUT);
+//pinMode(PracticeRaceSelectSwitch, INPUT);
+//pinMode(lowBATled, OUTPUT);
+//pinMode(powerONled, OUTPUT);
  // Attach an interrupt to the ISR vector
-attachInterrupt(2, power_ISR, RISING);
+//attachInterrupt(2, power_ISR, RISING);
 attachInterrupt(4, coachButton_ISR, RISING);
-attachInterrupt(3, set_ISR, RISING);
+//attachInterrupt(3, set_ISR, RISING);
  // turn on power_on LED
-digitalWrite(powerONled, HIGH);
+//digitalWrite(powerONled, HIGH);
  //define message contents
 go[0] = 111;
 set[0] = 101;
@@ -109,26 +109,29 @@ Serial.println(volts);
 
 //ISRs --------------------------------------------------------------
 
-void power_ISR() {
+/*void power_ISR() {
   BATvoltagePinState = digitalRead(BATvoltagePin);
   //here we read the output of the comparator, if pressed turn led on.
   Serial.println("battery low");
   digitalWrite(lowBATled, HIGH);
-}
+}*/
 
 void coachButton_ISR() {
+  detachInterrupt(4);
   coachButtonState = digitalRead(coachButton);
   Serial.println("coach button");
   //if for practice time (ie switch is OFF)
   if (digitalRead(!digitalRead(PracticeRaceSelectSwitch))){
     Serial.println(go[0]);
     radio.write(go, 1); //write message size = 1
+    delay(500);
+    attachInterrupt(4, coachButton_ISR, RISING);
   }
 }
 
-void set_ISR() {
+/*void set_ISR() {
   setSwitchState = digitalRead(setSwitch);
     Serial.println("set switch");
     Serial.println(set[0]);
     radio.write(set, 1);
-}
+}*/
