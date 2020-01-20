@@ -20,9 +20,9 @@ unsigned int clap;
 int coachButton = 7;
 int setSwitch = 3;
 int BATvoltagePin = 2; 
-int PracticeRaceSelectSwitch = 8;
+int PracticeRaceSelectSwitch = 8; //practice mode is a logic 1
 
-volatile int coachButtonState = 0; //might need to change?
+volatile int coachButtonState = 0; //included for possible later use. if not necessary - can be deleted
 volatile int setSwitchState = 0;
 volatile int BATvoltagePinState = 0;
 
@@ -38,14 +38,14 @@ radio.openWritingPipe(pipe);
  //I-O
 //pinMode(BATvoltagePin, INPUT);
 pinMode(coachButton, INPUT);
-//pinMode(setSwitch, INPUT);
-//pinMode(PracticeRaceSelectSwitch, INPUT);
+pinMode(setSwitch, INPUT);
+pinMode(PracticeRaceSelectSwitch, INPUT);
 //pinMode(lowBATled, OUTPUT);
 //pinMode(powerONled, OUTPUT);
  // Attach an interrupt to the ISR vector
 //attachInterrupt(2, power_ISR, RISING);
-attachInterrupt(4, coachButton_ISR, RISING);
-//attachInterrupt(3, set_ISR, RISING);
+attachInterrupt(digitalPinToInterrupt(7), coachButton_ISR, RISING);
+attachInterrupt(digitalPinToInterrupt(3), set_ISR, RISING);
  // turn on power_on LED
 //digitalWrite(powerONled, HIGH);
  //define message contents
@@ -58,11 +58,14 @@ set[0] = 101;
 
 
 void loop(void){
-  
   //while select switch ON for race, listen for shot
-  while(digitalRead(PracticeRaceSelectSwitch))
+  while(!digitalRead(PracticeRaceSelectSwitch))
   {
     listen();
+  }
+    while(digitalRead(PracticeRaceSelectSwitch))
+  {
+    
   }
 } 
 
@@ -74,7 +77,7 @@ void loop(void){
 void listen(){
   
 unsigned long start= millis(); // Start of sample window
-unsigned int peakToPeak = 0; // peak­to­peak level
+unsigned int peakToPeak = 0; // peak-to-peak level
 unsigned int signalMax = 0;
 unsigned int signalMin = 1024;
 
@@ -118,20 +121,18 @@ Serial.println(volts);
 
 void coachButton_ISR() {
   detachInterrupt(4);
-  coachButtonState = digitalRead(coachButton);
+  //coachButtonState = digitalRead(coachButton);
   Serial.println("coach button");
   //if for practice time (ie switch is OFF)
-  if (digitalRead(!digitalRead(PracticeRaceSelectSwitch))){
+  if(digitalRead(PracticeRaceSelectSwitch)){
     Serial.println(go[0]);
     radio.write(go, 1); //write message size = 1
-    delay(500);
-    attachInterrupt(4, coachButton_ISR, RISING);
   }
+    attachInterrupt(4, coachButton_ISR, RISING);
 }
 
-/*void set_ISR() {
-  setSwitchState = digitalRead(setSwitch);
+void set_ISR() {
     Serial.println("set switch");
     Serial.println(set[0]);
     radio.write(set, 1);
-}*/
+}
