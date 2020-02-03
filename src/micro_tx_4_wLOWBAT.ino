@@ -51,6 +51,12 @@ attachInterrupt(digitalPinToInterrupt(3), set_ISR, RISING);
  //define message contents
 go[0] = 111;
 set[0] = 101;
+
+  if (!digitalRead(BATvoltagePin))
+  {
+  Serial.println("battery low");
+  digitalWrite(lowBATled, HIGH);
+  }
 }
 
 //main loop ----------------------------------------------------------
